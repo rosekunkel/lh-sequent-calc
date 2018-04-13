@@ -13,11 +13,40 @@ left (Sequent xs _) = xs
 right :: Sequent -> [Formula]
 right (Sequent _ xs) = xs
 
+{-@ reflect repeatHeads @-}
+{-@ repeatHeads :: xs:{[Formula] | len xs > 0} -> {ys:[Formula] | len ys >= 2} -> Bool @-}
+repeatHeads :: [Formula] -> [Formula] -> Bool
+repeatHeads (x:_) (y:z:_) = x == y && y == z
+
 {-@ reflect sequenceEqual @-}
 sequenceEqual :: [Formula] -> [Formula] -> Bool
 sequenceEqual [] [] = True
 sequenceEqual (x:xs) (y:ys) = x == y && sequenceEqual xs ys
 sequenceEqual _ _ = False
+
+{-@ reflect sequenceAppend @-}
+sequenceAppend :: [Formula] -> [Formula] -> [Formula]
+sequenceAppend (x:xs) ys = x:(sequenceAppend xs ys)
+sequenceAppend [] xs = xs
+
+{-@ reflect orHeads @-}
+{-@ orHeads :: xs:{[Formula] | len xs > 0} -> {ys:[Formula] | len ys > 0} -> {zs:[Formula] | len zs > 0} -> Bool @-}
+orHeads :: [Formula] -> [Formula] -> [Formula] -> Bool
+orHeads (x:xs) (y:ys) (z:zs) =
+   x == (Or y z) &&
+   xs == sequenceAppend zs ys
+
+{-@ reflect orHead1 @-}
+{-@ orHead1 :: xs:{[Formula] | len xs > 0} -> {ys:[Formula] | len ys > 0} -> Bool @-}
+orHead1 :: [Formula] -> [Formula] -> Bool
+orHead1 ((Or x _):xs) (y:ys) = x == y && xs == ys
+orHead1 _ _ = False
+
+{-@ reflect orHead2 @-}
+{-@ orHead2 :: xs:{[Formula] | len xs > 0} -> {ys:[Formula] | len ys > 0} -> Bool @-}
+orHead2 :: [Formula] -> [Formula] -> Bool
+orHead2 ((Or _ x):xs) (y:ys) = x == y && xs == ys
+orHead2 _ _ = False
 
 {-@ reflect isTransposition @-}
 {-@ isTransposition :: xs:{[Formula] | len xs >= 2} -> {ys:[Formula] | len ys = len xs} -> Bool @-}
