@@ -1,0 +1,46 @@
+name:           lh-sequent-calc
+version:        0.1.0.0
+description:    Please see the README on Github at <https://github.com/wkunkel/lh-sequent-calc#readme>
+homepage:       https://github.com/wkunkel/lh-sequent-calc#readme
+bug-reports:    https://github.com/wkunkel/lh-sequent-calc/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2018 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/wkunkel/lh-sequent-calc
+
+library
+  hs-source-dirs:
+      src
+  build-depends:
+      base >= 4.7 && < 5
+  exposed-modules:
+      SequentCalc
+  other-modules:
+      SequentCalc.Syntax
+      SequentCalc.Util   
+  default-language: Haskell2010
+
+test-suite lh-sequent-calc-test
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  hs-source-dirs:
+      test
+  build-depends:
+      base >= 4.7 && < 5
+    , lh-sequent-calc
+    , tasty >= 1.0
+    , path >= 0.6
+    , path-io >= 1.3
+    , typed-process >= 0.2.2
+    , text >= 1.2
+  default-language: Haskell2010
