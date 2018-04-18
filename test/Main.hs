@@ -3,6 +3,9 @@
 
 module Main where
 
+import Data.Maybe
+import System.Exit
+
 import Test.Tasty
 import Test.Tasty.Providers
 
@@ -10,7 +13,6 @@ import Path
 import Path.IO
 
 import System.Process.Typed
-import System.Exit
 
 import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.Encoding as T
@@ -21,9 +23,9 @@ main = do
   shouldPassFiles <- getHsFiles [reldir|test/should-pass|]
   shouldFailFiles <- getHsFiles [reldir|test/should-fail|]
 
-  sourceTests <- mapM (runLiquid True) sourceFiles
-  shouldPassTests <- mapM (runLiquid True) shouldPassFiles
-  shouldFailTests <- mapM (runLiquid False) shouldFailFiles
+  sourceTests <- mapM (runLiquid Safe) sourceFiles
+  shouldPassTests <- mapM (runLiquid Safe) shouldPassFiles
+  shouldFailTests <- mapM (runLiquid Unsafe) shouldFailFiles
  
   defaultMain $ testGroup "Liquid Haskell Tests" [
     testGroup "Sources" sourceTests,
@@ -38,42 +40,49 @@ getHsFiles path = do
   where
     isHsFile file = fileExtension file == ".hs"
 
-runLiquid :: Bool -> Path Abs File -> IO TestTree
-runLiquid shouldPass file = do
+runLiquid :: LiquidResult -> Path Abs File -> IO TestTree
+runLiquid expectedResult file = do
   relativeFile <- makeRelativeToCurrentDir file
   return $ singleTest
     ("Running liquid on " ++ (toFilePath (relativeFile)))
-    (RunLiquid file shouldPass)
+    (RunLiquid file expectedResult)
 
-data RunLiquid = RunLiquid {
-  runLiquidFile :: Path Abs File,
-  runLiquidShouldPass :: Bool
-  }
+data RunLiquid = RunLiquid (Path Abs File) LiquidResult
+
+data LiquidResult = Safe | Unsafe
+  deriving (Eq)
+
+exitCodeToLiquidResult :: ExitCode -> Maybe LiquidResult
+exitCodeToLiquidResult ExitSuccess = Just Safe
+exitCodeToLiquidResult (ExitFailure 1) = Just Unsafe
+exitCodeToLiquidResult _ = Nothing
 
 instance IsTest RunLiquid where
-  run _ (RunLiquid file shouldPass) _ = do
+  run _ (RunLiquid file expectedResult) _ = do
     (exitCode, stdout, stderr)  <- readProcess liquid
-    return $
-      if (isSuccess exitCode) == shouldPass then
-        testPassed ""
-      else if shouldPass then
-        testFailed $ T.unpack $ T.unlines [
-          "STDOUT:",
-          T.decodeUtf8 stdout,
-          "",
-          "STDERR:",
-          T.decodeUtf8 stderr
-          ]
+    return $ fromMaybe (testFailed $ failureString stdout stderr) $ do
+      result <- exitCodeToLiquidResult exitCode
+      if result == expectedResult then
+        return $ testPassed ""
+      else if result == Safe then
+        return $ testFailed "" -- We don't get useful output when code is deemed
+                               -- safe.
       else
-        testFailed "" -- We don't get useful output when liquid succeeds.
+        Nothing
     where
-      liquid = proc "liquid" [
-        toFilePath file,
-        "--idirs=src",
-        "--reflection",
-        "--ple"
+      liquid = proc "liquid" $
+        [ toFilePath file
+        , "--idirs=src"
+        , "--reflection"
+        , "--ple"
         ]
-      isSuccess exitCode = exitCode == ExitSuccess
+      failureString stdout stderr = T.unpack $ T.unlines $
+        [ "STDOUT:"
+        , T.decodeUtf8 stdout
+        , ""
+        , "STDERR:"
+        , T.decodeUtf8 stderr
+        ]
 
   testOptions = return []
   
