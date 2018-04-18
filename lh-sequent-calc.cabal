@@ -25,6 +25,7 @@ library
       base >= 4.7 && < 5,
       HaTeX >= 3.18
   exposed-modules:
+     ReflectedPrelude
      SequentCalc
      SequentCalc.Latex
   other-modules:

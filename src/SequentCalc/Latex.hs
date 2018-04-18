@@ -1,11 +1,14 @@
 {-@ LIQUID "--reflection" @-}
 {-@ LIQUID "--ple" @-}
 
+{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module SequentCalc.Latex where
 
+import ReflectedPrelude
 import SequentCalc
+
 import Text.LaTeX
 import Text.LaTeX.Base.Class
 import Text.LaTeX.Base.Syntax
@@ -34,6 +37,7 @@ instance Texy Sequent where
 
 instance Texy Proof where
   texy (Identity s) = prfTree (textrm "I") [] s
+  texy (Cut l r s) = prfTree (textrm "Cut") [l, r] s
   texy (OrLeft l r s) = prfTree (ordVee <> textrm (fromLaTeX "L")) [l, r] s
   texy (OrRight1 p s) = prfTree ((ordVee <> textrm (fromLaTeX "R")) !: (fromLaTeX "1")) [p] s
   texy (OrRight2 p s) = prfTree ((ordVee <> textrm (fromLaTeX "R")) !: (fromLaTeX "2")) [p] s
