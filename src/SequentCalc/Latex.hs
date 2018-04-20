@@ -1,12 +1,8 @@
-{-@ LIQUID "--reflection" @-}
-{-@ LIQUID "--ple" @-}
-
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module SequentCalc.Latex where
 
-import ReflectedPrelude
+import Prelude.Reflected
 import SequentCalc
 
 import Text.LaTeX

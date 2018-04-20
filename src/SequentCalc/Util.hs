@@ -1,8 +1,6 @@
-{-@ LIQUID "--reflection" @-}
-{-@ LIQUID "--ple" @-}
-
 module SequentCalc.Util where
 
+import Prelude.Reflected
 import SequentCalc.Syntax
 
 {-@ measure left @-}

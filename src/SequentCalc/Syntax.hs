@@ -1,7 +1,6 @@
-{-@ LIQUID "--reflection" @-}
-{-@ LIQUID "--ple" @-}
-
 module SequentCalc.Syntax where
+
+import Prelude.Reflected
 
 data Formula = Var String
              | Not Formula

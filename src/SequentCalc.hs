@@ -1,15 +1,10 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-
-{-@ LIQUID "--reflection" @-}
-{-@ LIQUID "--ple" @-}
-
 module SequentCalc
   ( module SequentCalc
   , module SequentCalc.Syntax
   , module SequentCalc.Util
   ) where
 
-import ReflectedPrelude
+import Prelude.Reflected
 
 import SequentCalc.Syntax
 import SequentCalc.Util

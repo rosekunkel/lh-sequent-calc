@@ -1,6 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-
-import ReflectedPrelude
+import Prelude.Reflected
 import SequentCalc
 
 test :: Proof

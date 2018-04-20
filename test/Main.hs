@@ -3,6 +3,8 @@
 
 module Main where
 
+import Prelude
+
 import Data.Maybe
 import System.Exit
 
@@ -73,6 +75,7 @@ instance IsTest RunLiquid where
       liquid = proc "liquid" $
         [ toFilePath file
         , "--idirs=src"
+        , "--ghc-option=-XNoImplicitPrelude"
         , "--reflection"
         , "--ple"
         ]
