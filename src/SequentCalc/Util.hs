@@ -3,6 +3,11 @@ module SequentCalc.Util where
 import Prelude.Reflected
 import SequentCalc.Syntax
 
+-- Currently infix annotations are not imported, so we need to
+-- duplicate them here. See
+-- https://github.com/ucsd-progsys/liquidhaskell/issues/1123
+{-@ infixr 5 ++ @-}
+
 {-@ measure left @-}
 left :: Sequent -> [Formula]
 left (Sequent xs _) = xs
@@ -11,35 +16,31 @@ left (Sequent xs _) = xs
 right :: Sequent -> [Formula]
 right (Sequent _ xs) = xs
 
-{-@ reflect repeatHeads @-}
-{-@ repeatHeads :: xs:{[Formula] | len xs > 0} -> {ys:[Formula] | len ys >= 2} -> Bool @-}
-repeatHeads :: [Formula] -> [Formula] -> Bool
-repeatHeads (x:_) (y:z:_) = x == y && y == z
+{-@ measure isOr @-}
+isOr :: Formula -> Bool
+isOr (Or _ _) = True
+isOr _ = False
+
+{-@ measure leftConjunct @-}
+{-@ leftConjunct :: {f:Formula | isOr f} -> Formula @-}
+leftConjunct :: Formula -> Formula
+leftConjunct (Or l _) = l
+
+{-@ measure rightConjunct @-}
+{-@ rightConjunct :: {f:Formula | isOr f} -> Formula @-}
+rightConjunct :: Formula -> Formula
+rightConjunct (Or _ r) = r
+
+{-@ predicate RepeatHeads XS YS = head XS == head YS && head YS == head (tail YS) @-}
+{-@ predicate OrHeads XS YS ZS = XS == cons (Or (head YS) (head ZS)) (tail ZS ++ tail YS) @-}
+{-@ predicate OrHead1 XS YS = leftConjunct (head XS) == head YS && tail XS == tail YS @-}
+{-@ predicate OrHead2 XS YS = rightConjunct (head XS) == head YS && tail XS == tail YS @-}
 
 {-@ reflect sequenceEqual @-}
 sequenceEqual :: [Formula] -> [Formula] -> Bool
 sequenceEqual [] [] = True
 sequenceEqual (x:xs) (y:ys) = x == y && sequenceEqual xs ys
 sequenceEqual _ _ = False
-
-{-@ reflect orHeads @-}
-{-@ orHeads :: xs:{[Formula] | len xs > 0} -> {ys:[Formula] | len ys > 0} -> {zs:[Formula] | len zs > 0} -> Bool @-}
-orHeads :: [Formula] -> [Formula] -> [Formula] -> Bool
-orHeads (x:xs) (y:ys) (z:zs) =
-   x == (Or y z) &&
-   xs == zs ++ ys
-
-{-@ reflect orHead1 @-}
-{-@ orHead1 :: xs:{[Formula] | len xs > 0} -> {ys:[Formula] | len ys > 0} -> Bool @-}
-orHead1 :: [Formula] -> [Formula] -> Bool
-orHead1 ((Or x _):xs) (y:ys) = x == y && xs == ys
-orHead1 _ _ = False
-
-{-@ reflect orHead2 @-}
-{-@ orHead2 :: xs:{[Formula] | len xs > 0} -> {ys:[Formula] | len ys > 0} -> Bool @-}
-orHead2 :: [Formula] -> [Formula] -> Bool
-orHead2 ((Or _ x):xs) (y:ys) = x == y && xs == ys
-orHead2 _ _ = False
 
 {-@ reflect isTransposition @-}
 {-@ isTransposition :: xs:{[Formula] | len xs >= 2} -> {ys:[Formula] | len ys = len xs} -> Bool @-}

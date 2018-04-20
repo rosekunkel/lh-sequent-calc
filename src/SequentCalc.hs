@@ -44,19 +44,19 @@ data Proof = Identity Sequent
   | OrLeft :: p0:Proof -> p1:Proof
       -> {s:Sequent | len (left (conclusion p0)) > 0 &&
                       len (left (conclusion p1)) > 0 &&
-                      orHeads (left s) (left (conclusion p0)) (left (conclusion p1)) &&
+                      OrHeads (left s) (left (conclusion p0)) (left (conclusion p1)) &&
                       right s == (right (conclusion p0)) ++ (right (conclusion p1))}
       -> Proof
   | OrRight1 :: p:Proof
       -> {s:Sequent | len (right s) > 0 &&
                       len (right (conclusion p)) > 0 &&
-                      orHead1 (right s) (right (conclusion p)) &&
+                      OrHead1 (right s) (right (conclusion p)) &&
                       left s == left (conclusion p)}
       -> Proof
   | OrRight2 :: p:Proof
       -> {s:Sequent | len (right s) > 0 &&
                       len (right (conclusion p)) > 0 &&
-                      orHead2 (right s) (right (conclusion p)) &&
+                      OrHead2 (right s) (right (conclusion p)) &&
                       left s == left (conclusion p)}
       -> Proof
   | NotLeft :: p:Proof
@@ -87,13 +87,13 @@ data Proof = Identity Sequent
       -> {s:Sequent | right s == right (conclusion p) &&
                       len (left s) > 0 &&
                       len (left (conclusion p)) >= 2 &&
-                      repeatHeads (left s) (left (conclusion p))}
+                      RepeatHeads (left s) (left (conclusion p))}
       -> Proof
   | ContractRight :: p:Proof
       -> {s:Sequent | left s == left (conclusion p) &&
                       len (right s) > 0 &&
                       len (right (conclusion p)) >= 2 &&
-                      repeatHeads (right s) (right (conclusion p))}
+                      RepeatHeads (right s) (right (conclusion p))}
       -> Proof
   | PermuteLeft :: p:Proof
       -> {s:Sequent | right s == right (conclusion p) &&
