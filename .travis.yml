@@ -10,6 +10,9 @@ before_install:
   - ./travis/install-stack.sh
   - export PATH=$HOME/.local/bin:$PATH
 
+  # Install Z3
+  - ./travis/install-z3.sh
+
   # Install Liquid Haskell
   - ./travis/install-liquid-haskell.sh
 
