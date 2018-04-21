@@ -6,9 +6,12 @@ cache:
     - $HOME/.stack
 
 before_install:
+  # Setup local bin
+  - mkdir -p "${HOME}/.local/bin"
+  - export PATH="${HOME}/.local/bin:${PATH}"
+  
   # Install Stack
   - ./travis/install-stack.sh
-  - export PATH=$HOME/.local/bin:$PATH
 
   # Install Z3
   - ./travis/install-z3.sh
