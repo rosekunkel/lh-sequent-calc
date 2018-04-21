@@ -20,7 +20,11 @@ before_install:
   - ./travis/install-liquid-haskell.sh
 
 install:
-- stack --no-terminal --install-ghc test --only-dependencies
+  - stack --no-terminal --install-ghc test --only-dependencies
 
 script:
-- stack --no-terminal --skip-ghc-check test
+  # Currently tests can fail the first few times they’re run because they must
+  # be run in topologically-sorted order but the order in which they run is
+  # nondeterministic. As a workaround, we just try running the tests multiple
+  # times. (This will hopefully be fixed soon.)
+  - travis_retry stack --no-terminal --skip-ghc-check test
