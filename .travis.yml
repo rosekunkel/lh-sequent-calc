@@ -1,0 +1,19 @@
+sudo: required
+
+cache:
+  directories:
+    - $HOME/.stack
+
+before_install:
+  # Install Stack
+  - ./travis/install-stack.sh
+  - export PATH=$HOME/.local/bin:$PATH
+
+  # Install Liquid Haskell
+  - ./travis/install-liquid-haskell.sh
+
+install:
+- stack --no-terminal --install-ghc test --only-dependencies
+
+script:
+- stack --no-terminal --skip-ghc-check test
