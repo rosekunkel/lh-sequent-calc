@@ -2,6 +2,11 @@ name: lh-sequent-calc
 version: 0.1.0
 github: wkunkel/lh-sequent-calc
 
+verbatim:
+  # We need this because of a bug in hpack:
+  # https://github.com/sol/hpack/issues/213
+  cabal-version: '>= 2.0'
+
 extra-source-files:
   - README.md
 dependencies:
@@ -29,3 +34,11 @@ tests:
       - tasty ^>= 1.0
       - text ^>= 1.2
       - typed-process ^>= 0.2
+
+executables:
+  homework-1:
+    source-dirs: examples/homework-1
+    main: Main.hs
+    dependencies:
+      - lh-sequent-calc
+      - HaTeX ^>= 3.18

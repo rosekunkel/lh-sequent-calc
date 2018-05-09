@@ -2,3 +2,9 @@
 *~
 .liquid/
 lh-sequent-calc.cabal
+/examples/homework-1/not-p-implies-p-implies-q.tex
+/examples/homework-1/q-implies-p-or-not-p.tex
+/examples/homework-1/q-implies-p-or-q.tex
+*.aux
+*.pdf
+*.log

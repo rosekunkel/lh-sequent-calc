@@ -1,0 +1,23 @@
+\documentclass{scrartcl}
+
+\usepackage{enumitem, mathtools, mdframed, prftree}
+
+\begin{document}
+\section*{Problem 4}
+\begin{mdframed}
+  Prove the following in the sequent calculus. You may use any rule
+  given in the notes, including the derived rules.
+
+  \begin{enumerate}[label=(\alph*)]
+  \item \(q \Rightarrow (p \vee \neg p)\)
+  \item \(q \Rightarrow (p \vee q)\)
+  \item \((\neg p) \Rightarrow (p \Rightarrow q)\)
+  \end{enumerate}
+\end{mdframed}
+
+\begin{enumerate}[label=(\alph*)]
+\item \input{q-implies-p-or-not-p}
+\item \input{q-implies-p-or-q}
+\item \input{not-p-implies-p-implies-q}
+\end{enumerate}
+\end{document}

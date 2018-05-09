@@ -8,10 +8,11 @@ import SequentCalc
 import Text.LaTeX
 import Text.LaTeX.Base.Class
 import Text.LaTeX.Base.Syntax
-import Text.LaTeX.Packages.AMSMath
+import Text.LaTeX.Packages.AMSMath (math, text, vee, (!:))
 
 newtype SequenceRtl = SequenceRtl [Formula]
 newtype SequenceLtr = SequenceLtr [Formula]
+newtype RawProof = RawProof Proof
 
 instance Texy Formula where
   texy (Var x) = fromLaTeX $ fromString x
@@ -32,19 +33,25 @@ instance Texy Sequent where
   texy (Sequent l r) = texy (SequenceRtl l) `vdash` texy (SequenceLtr r)
 
 instance Texy Proof where
-  texy (Identity s) = prfTree (textrm "I") [] s
-  texy (Cut l r s) = prfTree (textrm "Cut") [l, r] s
-  texy (OrLeft l r s) = prfTree (ordVee <> textrm (fromLaTeX "L")) [l, r] s
-  texy (OrRight1 p s) = prfTree ((ordVee <> textrm (fromLaTeX "R")) !: (fromLaTeX "1")) [p] s
-  texy (OrRight2 p s) = prfTree ((ordVee <> textrm (fromLaTeX "R")) !: (fromLaTeX "2")) [p] s
-  texy (NotLeft p s) = prfTree (neg <> textrm (fromLaTeX "L")) [p] s
-  texy (NotRight p s) = prfTree (neg <> textrm (fromLaTeX "R")) [p] s
-  texy (WeakenLeft p s) = prfTree (textrm (fromLaTeX "WL")) [p] s
-  texy (WeakenRight p s) = prfTree (textrm (fromLaTeX "WR")) [p] s
-  texy (ContractLeft p s) = prfTree (textrm (fromLaTeX "CL")) [p] s
-  texy (ContractRight p s) = prfTree (textrm (fromLaTeX "CR")) [p] s
-  texy (PermuteLeft p s) = prfTree (textrm (fromLaTeX "PL")) [p] s
-  texy (PermuteRight p s) = prfTree (textrm (fromLaTeX "PR")) [p] s
+  texy proof = raisebox
+    (CustomMeasure ("-" <> comm0 "height"))
+    Nothing Nothing
+    (texy (RawProof proof))
+
+instance Texy RawProof where
+  texy (RawProof (Identity s)) = prfTree (fromLaTeX "I") [] s
+  texy (RawProof (Cut l r s)) = prfTree (fromLaTeX "Cut") [l, r] s
+  texy (RawProof (OrLeft l r s)) = prfTree (math (ordVee <> text (fromLaTeX "L"))) [l, r] s
+  texy (RawProof (OrRight1 p s)) = prfTree (math ((ordVee <> text (fromLaTeX "R")) !: (fromLaTeX "1"))) [p] s
+  texy (RawProof (OrRight2 p s)) = prfTree (math ((ordVee <> text (fromLaTeX "R")) !: (fromLaTeX "2"))) [p] s
+  texy (RawProof (NotLeft p s)) = prfTree (math (neg <> text (fromLaTeX "L"))) [p] s
+  texy (RawProof (NotRight p s)) = prfTree (math (neg <> text (fromLaTeX "R"))) [p] s
+  texy (RawProof (WeakenLeft p s)) = prfTree (fromLaTeX "WL") [p] s
+  texy (RawProof (WeakenRight p s)) = prfTree (fromLaTeX "WR") [p] s
+  texy (RawProof (ContractLeft p s)) = prfTree (fromLaTeX "CL") [p] s
+  texy (RawProof (ContractRight p s)) = prfTree (fromLaTeX "CR") [p] s
+  texy (RawProof (PermuteLeft p s)) = prfTree (fromLaTeX "PL") [p] s
+  texy (RawProof (PermuteRight p s)) = prfTree (fromLaTeX "PR") [p] s
 
 negOf :: LaTeXC l => l -> l
 negOf l = neg <> l
@@ -74,7 +81,7 @@ prfTree :: LaTeXC l => l -> [Proof] -> Sequent -> l
 prfTree ruleName above below = liftL
   (\ruleName -> TeXComm "prftree" $
     OptArg (raw "l") :
-    FixArg ruleName :
-    map (\proof -> FixArg $ texy proof) above ++
+    FixArg (parens ruleName) :
+    map (\proof -> FixArg $ texy (RawProof proof)) above ++
     [FixArg $ texy below])
   ruleName
