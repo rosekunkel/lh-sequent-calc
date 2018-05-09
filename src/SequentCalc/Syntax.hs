@@ -9,3 +9,10 @@ data Formula = Var String
 
 data Sequent = Sequent [Formula] [Formula]
   deriving (Eq)
+
+{-@ reflect formulaAnd @-}
+p `formulaAnd` q = (Not ((Not p) `Or` (Not q)))
+
+{-@ reflect formulaImplies @-}
+formulaImplies :: Formula -> Formula -> Formula
+p `formulaImplies` q = (Not p) `Or` q

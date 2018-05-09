@@ -124,3 +124,86 @@ conclusion (ContractLeft _ s) = s
 conclusion (ContractRight _ s) = s
 conclusion (PermuteLeft _ s) = s
 conclusion (PermuteRight _ s) = s
+
+{-@ reflect andLeft1 @-}
+{-@ andLeft1 :: {p:Proof | len (left (conclusion p)) >= 1}
+             -> Formula
+             -> Proof @-}
+andLeft1 :: Proof -> Formula -> Proof
+andLeft1 proof q =
+  case conclusion proof of
+    (Sequent (p:l) r) ->
+      (NotLeft
+        (OrRight1
+          (NotRight
+            proof
+            (Sequent l ((Not p):r)))
+          (Sequent l (((Not p) `Or` (Not q)):r)))
+        (Sequent ((Not ((Not p) `Or` (Not q))):l) r))
+
+{-@ reflect andLeft2 @-}
+{-@ andLeft2 :: {p:Proof | len (left (conclusion p)) >= 1}
+             -> Formula
+             -> Proof @-}
+andLeft2 :: Proof -> Formula -> Proof
+andLeft2 proof p =
+  case conclusion proof of
+    (Sequent (q:l) r) ->
+      (NotLeft
+        (OrRight2
+          (NotRight
+            proof
+            (Sequent l ((Not q):r)))
+          (Sequent l (((Not p) `Or` (Not q)):r)))
+        (Sequent ((Not ((Not p) `Or` (Not q))):l) r))
+
+{-@ reflect andRight @-}
+{-@ andRight :: {p1:Proof | len (right (conclusion p1)) >= 1}
+             -> {p2:Proof | len (right (conclusion p2)) >= 1}
+             -> Proof @-}
+andRight proof1 proof2 =
+  case (conclusion proof1, conclusion proof2) of
+    (Sequent l1 (p:r1), Sequent l2 (q:r2)) ->
+      (NotRight
+        (OrLeft
+          (NotLeft
+            proof1
+            (Sequent ((Not p):l1) r1))
+          (NotLeft
+            proof2
+            (Sequent ((Not q):l2) r2))
+          (Sequent (((Not p) `Or` (Not q)):l2 ++ l1) (r1 ++ r2)))
+        (Sequent (l2 ++ l1) ((Not ((Not p) `Or` (Not q))):r1 ++ r2)))
+
+{-@ reflect impliesLeft @-}
+{-@ impliesLeft :: {p1:Proof | len (right (conclusion p1)) >= 1}
+                -> {p2:Proof | len (left (conclusion p2)) >= 1}
+                -> Proof @-}
+impliesLeft :: Proof -> Proof -> Proof
+impliesLeft proof1 proof2 =
+  case (conclusion proof1, conclusion proof2) of
+    (Sequent l1 (p:r1), Sequent (q:l2) r2) ->
+      (OrLeft
+        (NotLeft
+          proof1
+          (Sequent ((Not p):l1) r1))
+        proof2
+        (Sequent (((Not p) `Or` q):l2 ++ l1) (r1 ++ r2)))
+
+{-@ reflect impliesRight @-}
+{-@ impliesRight :: {p:Proof | len (right (conclusion p)) >= 1 &&
+                               len (left (conclusion p)) >= 1}
+                 -> Proof @-}
+impliesRight :: Proof -> Proof
+impliesRight proof =
+  case conclusion proof of
+    (Sequent (p:l) (q:r)) ->
+      (ContractRight
+        (OrRight1
+         (NotRight
+           (OrRight2
+             proof
+             (Sequent (p:l) (((Not p) `Or` q):r)))
+           (Sequent l ((Not p):((Not p) `Or` q):r)))
+          (Sequent l (((Not p) `Or` q):((Not p) `Or` q):r)))
+        (Sequent l (((Not p) `Or` q):r)))
